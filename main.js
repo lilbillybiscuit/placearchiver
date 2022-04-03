@@ -53,7 +53,7 @@ ws.on('message', function message(data) {
     time=parseInt(time);
     if (url) {
         console.log(url+" "+time);
-        download(url, Math.floor(time/10000));
+        download(url, Math.floor(time/1000000));
     }
   }
 });
