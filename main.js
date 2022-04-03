@@ -1,7 +1,7 @@
 var WebSocket = require('ws');
 var fs = require('fs');
 var http = require('https');
-const spawn = require('child-process');
+const {spawn,exec} = require('child_process');
 
 var send1="{\"type\":\"connection_init\",\"payload\":{\"Authorization\":\"Bearer 265777668856-L9Zf-mrKHetsGneevoBEgm5WizDOSA\"}}";
 var send2="{\"id\":\"1\",\"type\":\"start\",\"payload\":{\"variables\":{\"input\":{\"channel\":{\"teamOwner\":\"AFD2022\",\"category\":\"CONFIG\"}}},\"extensions\":{},\"operationName\":\"configuration\",\"query\":\"subscription configuration($input: SubscribeInput!) {\\n  subscribe(input: $input) {\\n    id\\n    ... on BasicMessage {\\n      data {\\n        __typename\\n        ... on ConfigurationMessageData {\\n          colorPalette {\\n            colors {\\n              hex\\n              index\\n              __typename\\n            }\\n            __typename\\n          }\\n          canvasConfigurations {\\n            index\\n            dx\\n            dy\\n            __typename\\n          }\\n          canvasWidth\\n          canvasHeight\\n          __typename\\n        }\\n      }\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"}}";
@@ -13,9 +13,12 @@ var file;
 var request;
 var prevTime=-1;
 function download(url, time) {
-    if (prevTime==-1 || prevTime!=time) {
+    if (prevTime==-1) prevTime=time;
+    if (prevTime!=time) {
+        var cmd = `zip -r -0 -q ${"/data/"+prevTime+".zip"} ${"/data/"+prevTime+"/"}`
+        exec(cmd);
+        console.log(cmd);
         prevTime=time;
-        spawn('zip', ['-r','-0','-q', time+".zip", time+"/"]);
     }
     file = fs.createWriteStream("/data/"+time.toString()+"/"+url.substring(url.lastIndexOf('/')+1));
     if (!fs.existsSync("/data/"+time.toString()+"/")){
@@ -50,7 +53,7 @@ ws.on('message', function message(data) {
     if (url) {
         console.log(url+" "+time);
         //console.log("/data/"+Math.floor(time/1000000).toString()+"/"+url.substring(url.lastIndexOf('/')+1))
-        download(url, Math.floor(time/1000000));
+        download(url, Math.floor(time/10000));
     }
   }
 });
